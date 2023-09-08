@@ -292,13 +292,34 @@ end
 
 # Still hacky as hell
 function generate_tex_elements(str::LaTeXString, font_family=FontFamily())
-    parts = String.(split(str, raw"$"))
-    groups = Vector{TeXElement}(undef, length(parts))
-    texts = parts[1:2:end]
-    maths = parts[2:2:end]
+    lines = map(LaTeXString.(split(str, raw"\n"))) do line
+        parts = String.(split(line, raw"$"))
+        groups = Vector{TeXElement}(undef, length(parts))
+        texts = parts[1:2:end]
+        maths = parts[2:2:end]
 
-    groups[1:2:end] = layout_text.(texts, Ref(font_family))
-    groups[2:2:end] = tex_layout.(texparse.(maths), Ref(font_family))
+        groups[1:2:end] = layout_text.(texts, Ref(font_family))
+        groups[2:2:end] = tex_layout.(texparse.(maths), Ref(font_family))
 
-    return unravel(horizontal_layout(groups))
+        return horizontal_layout(groups)
+    end 
+
+    linespace = 0.3
+    depth = 0.0
+    elements = []
+    leftmost_bound = 0.0
+    
+    for line in lines
+        m = hmid(line)
+        leftmost_bound = min(leftmost_bound, -m)
+        elems = map(unravel(line)) do (elem, (x, y), scale)
+            (elem, Point2f(x - m, y - depth), scale)
+        end
+        append!(elements, elems)
+        depth += linespace + inkheight(line)
+    end
+
+    return map(elements) do (elem, (x, y), scale)
+        (elem, Point2f(x - leftmost_bound, y), scale) 
+    end
 end

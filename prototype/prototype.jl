@@ -20,7 +20,7 @@ function draw_texelement!(ax, texchar::TeXChar, position, scale ; size=64)
     # TODO This doesn't make sense anymore
     text!(ax, string(Char(texchar.represented_char)), font=texchar.font,
         position=Point2f(x, y),
-        textsize=size*scale,
+        fontsize=size*scale,
         space=:data,
         markerspace=:data,
         align=(:left, :baseline),
@@ -148,7 +148,7 @@ end
 
 begin  # Quick test
     fig = Figure(resolution=(1800, 1000))
-    fig[1, 1] = Label(fig, "LaTeX in Makie.jl", tellwidth=false, textsize=64)
+    fig[1, 1] = Label(fig, "LaTeX in Makie.jl", tellwidth=false, fontsize=64)
     ax = Axis(fig[2, 1])
     hidedecorations!(ax)
     ax.aspect = DataAspect()
@@ -160,8 +160,9 @@ begin  # Quick test
             < \int_{0}^{2π} |\sin(\mu x)| dx"
     
     tex = L"\mathcal{A} \mathbb{R} \longrightarrow xyz \text{x y z} \mathrm{x y z}"
+    tex = L"Yay a tree\nTime $\delta t$"
 
     makie_tex!(ax, tex, debug=true, size=64)
-    fig[3, 1] = Label(fig, tex, tellwidth=false, tellheight=false, textsize=40)
+    fig[3, 1] = Label(fig, tex, tellwidth=false, tellheight=false, fontsize=40)
     fig
 end
